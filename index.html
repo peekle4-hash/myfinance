@@ -1,60 +1,209 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>나의 재테크 관리</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>재테크 관리</title>
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">💙</div>
+      <div>
+        <div class="title">재테크 관리</div>
+        <div class="subtitle">할 일 · 통장쪼개기 · 지출/수입 기록</div>
+      </div>
+    </div>
 
-<div class="container">
-    <header>
-        <h1>💎 재테크 플래너</h1>
-        <nav>
-            <button class="tab-btn active" onclick="openTab('todo')">오늘 할 일</button>
-            <button class="tab-btn" onclick="openTab('assets')">자산 관리</button>
-        </nav>
-    </header>
+    <nav class="tabs" role="tablist" aria-label="상단 탭">
+      <button class="tab is-active" data-tab="todo" role="tab" aria-selected="true">오늘 할 일</button>
+      <button class="tab" data-tab="assets" role="tab" aria-selected="false">내 자산</button>
+      <button class="tab" data-tab="help" role="tab" aria-selected="false">사용법</button>
+    </nav>
+  </header>
 
-    <!-- 탭 1: 오늘 할 일 -->
-    <section id="todo" class="tab-content active">
-        <div class="card">
-            <h3>📅 할 일 목록</h3>
-            <div class="input-group">
-                <input type="text" id="todoInput" placeholder="할 일을 입력하세요 (예: 적금 이체하기)">
-                <button onclick="addTodo()">추가</button>
-            </div>
-            <ul id="todoList"></ul>
-        </div>
+  <main class="container">
+    <!-- TODO TAB -->
+    <section id="tab-todo" class="panel is-active" role="tabpanel" aria-label="오늘 할 일">
+      <div class="grid two">
+        <section class="card">
+          <h2>날짜별 할 일</h2>
+          <p class="muted">날짜를 고르고 할 일을 추가하세요. 완료하면 체크 ✅ (가운데 + 밑줄 + 취소선)</p>
+
+          <div class="row">
+            <label class="field">
+              <span>날짜</span>
+              <input id="todoDate" type="date" />
+            </label>
+
+            <label class="field grow">
+              <span>할 일</span>
+              <input id="todoText" type="text" placeholder="예: 생활비 통장 정리하기" maxlength="120" />
+            </label>
+
+            <button id="addTodoBtn" class="btn primary">추가</button>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="todoListWrap">
+            <ol id="todoList" class="todoList"></ol>
+            <div id="todoEmpty" class="emptyState">아직 할 일이 없어요. 위에서 추가해봐요!</div>
+          </div>
+
+          <div class="row end">
+            <button id="clearDoneBtn" class="btn ghost">완료한 항목 삭제</button>
+            <button id="clearDateBtn" class="btn danger ghost">이 날짜 할 일 전체 삭제</button>
+          </div>
+        </section>
+
+        <aside class="card">
+          <h2>빠른 메모</h2>
+          <p class="muted">여기는 자유 메모. 자동 저장돼요.</p>
+          <textarea id="quickMemo" class="textarea" rows="14" placeholder="예: 다음 급여일 25일, 보험료 자동이체 확인"></textarea>
+
+          <div class="divider"></div>
+          <h3 class="smallTitle">오늘 한 줄</h3>
+          <div class="pillLine">
+            <input id="dailyQuote" class="input" type="text" placeholder="예: 작은 습관이 큰 자산이 된다" maxlength="80" />
+            <button id="saveQuoteBtn" class="btn">저장</button>
+          </div>
+          <div id="quotePreview" class="quotePreview"></div>
+        </aside>
+      </div>
     </section>
 
-    <!-- 탭 2: 자산 관리 -->
-    <section id="assets" class="tab-content">
-        <div class="card">
-            <h3>💰 내 자산 현황</h3>
-            <div class="asset-form">
-                <input type="text" id="accName" placeholder="계좌명">
-                <input type="text" id="accPurpose" placeholder="용도 (예: 비상금, 교통비)">
-                <input type="number" id="accBalance" placeholder="현재 금액">
-                <button onclick="addAsset()">계좌 추가</button>
+    <!-- ASSETS TAB -->
+    <section id="tab-assets" class="panel" role="tabpanel" aria-label="내 자산">
+      <div class="grid two">
+        <section class="card">
+          <h2>계좌 & 용도(버킷) 관리</h2>
+          <p class="muted">
+            “하나의 계좌에 여러 용도(버킷)”를 만들고, 지출/수입을 기록하면 자동으로 금액이 바뀌어요.
+          </p>
+
+          <div class="row">
+            <label class="field grow">
+              <span>새 계좌 이름</span>
+              <input id="newAccountName" type="text" placeholder="예: 미래에셋 CMA, 우리 월급통장" maxlength="40" />
+            </label>
+            <button id="addAccountBtn" class="btn primary">계좌 추가</button>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="kpiRow">
+            <div class="kpi">
+              <div class="kpiLabel">총 자산 합계</div>
+              <div id="totalAssets" class="kpiValue">₩0</div>
             </div>
-            <table id="assetTable">
-                <thead>
-                    <tr>
-                        <th>계좌명</th>
-                        <th>용도</th>
-                        <th>현재 잔액</th>
-                        <th>비용 기록</th>
-                        <th>관리</th>
-                    </tr>
-                </thead>
-                <tbody id="assetBody"></tbody>
+            <div class="kpi">
+              <div class="kpiLabel">버킷 개수</div>
+              <div id="totalBuckets" class="kpiValue">0</div>
+            </div>
+          </div>
+
+          <div id="accountsWrap" class="accountsWrap"></div>
+        </section>
+
+        <aside class="card">
+          <h2>지출/수입 기록</h2>
+          <p class="muted">기록하면 선택한 버킷 금액이 자동으로 업데이트돼요.</p>
+
+          <div class="row">
+            <label class="field grow">
+              <span>계좌</span>
+              <select id="txAccount"></select>
+            </label>
+            <label class="field grow">
+              <span>용도(버킷)</span>
+              <select id="txBucket"></select>
+            </label>
+          </div>
+
+          <div class="row">
+            <label class="field grow">
+              <span>유형</span>
+              <select id="txType">
+                <option value="expense">지출 (-)</option>
+                <option value="income">수입 (+)</option>
+              </select>
+            </label>
+            <label class="field grow">
+              <span>금액</span>
+              <input id="txAmount" type="number" min="0" step="100" placeholder="예: 15000" />
+            </label>
+          </div>
+
+          <div class="row">
+            <label class="field grow">
+              <span>메모</span>
+              <input id="txNote" type="text" placeholder="예: 교통비 충전, 통신비 납부" maxlength="60" />
+            </label>
+            <button id="addTxBtn" class="btn primary">기록</button>
+          </div>
+
+          <div class="divider"></div>
+
+          <h3 class="smallTitle">최근 기록</h3>
+          <div id="txEmpty" class="emptyState">아직 기록이 없어요.</div>
+          <div class="tableWrap">
+            <table class="table" aria-label="최근 지출/수입 기록">
+              <thead>
+                <tr>
+                  <th>날짜</th>
+                  <th>계좌</th>
+                  <th>버킷</th>
+                  <th>유형</th>
+                  <th class="right">금액</th>
+                  <th>메모</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="txTableBody"></tbody>
             </table>
-        </div>
-    </section>
-</div>
+          </div>
 
-<script src="script.js"></script>
+          <div class="row end">
+            <button id="exportBtn" class="btn">내보내기(JSON)</button>
+            <button id="resetBtn" class="btn danger ghost">전체 초기화</button>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- HELP TAB -->
+    <section id="tab-help" class="panel" role="tabpanel" aria-label="사용법">
+      <div class="card">
+        <h2>사용법 요약</h2>
+        <ul class="list">
+          <li><b>오늘 할 일</b>: 날짜 선택 → 할 일 입력 → 추가. 완료 체크하면 가운데 정렬 + 밑줄 + 취소선.</li>
+          <li><b>내 자산</b>: 계좌를 만든 뒤, 계좌 카드 안에서 <b>버킷(용도)</b>을 추가하세요 (예: 비상금/교통비/생활비/투자대기자금…).</li>
+          <li><b>지출/수입 기록</b>: 계좌+버킷 선택 → 금액 입력 → 기록. 선택한 버킷 금액이 자동 변경됩니다.</li>
+          <li>데이터는 <b>브라우저(LocalStorage)</b>에 저장돼요. 다른 컴퓨터/브라우저로 옮기려면 <b>내보내기(JSON)</b>를 사용하세요.</li>
+        </ul>
+
+        <div class="divider"></div>
+        <h3>추천 버킷(용도) 예시</h3>
+        <div class="chips" id="presetChips"></div>
+
+        <div class="divider"></div>
+        <h3>팁</h3>
+        <ul class="list">
+          <li>월급이 들어오는 계좌에서 “생활비/저축/투자”처럼 버킷을 나누고, 이체 대신 버킷으로 관리할 수 있어요.</li>
+          <li>버킷 금액이 음수가 되면 빨간색으로 표시돼요 (예산 초과 체크용).</li>
+        </ul>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <span>© 재테크 관리 · 로컬 저장</span>
+    <span class="dot">•</span>
+    <a href="#" id="scrollTop">맨 위로</a>
+  </footer>
+
+  <script src="app.js"></script>
 </body>
 </html>
