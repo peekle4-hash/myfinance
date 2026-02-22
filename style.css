@@ -1,21 +1,23 @@
 :root {
-    --bg-color: #f0f8ff; /* 연한 하늘색 배경 */
+    --bg-color: #eef5ff;
     --primary-color: #a2d2ff;
-    --secondary-color: #bde0fe;
-    --text-color: #4a4a4a;
+    --secondary-color: #cfe8ff;
+    --accent-color: #74b9ff;
+    --text-color: #555;
     --white: #ffffff;
+    --danger: #ffb3ba;
 }
 
 body {
     background-color: var(--bg-color);
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Malgun Gothic', sans-serif;
     color: var(--text-color);
     margin: 0;
     padding: 20px;
 }
 
 .container {
-    max-width: 800px;
+    max-width: 1100px;
     margin: 0 auto;
 }
 
@@ -27,94 +29,96 @@ header {
 nav {
     display: flex;
     justify-content: center;
-    gap: 10px;
-    margin-bottom: 20px;
+    gap: 15px;
+    margin-bottom: 25px;
 }
 
 .tab-btn {
-    padding: 10px 25px;
+    padding: 12px 30px;
     border: none;
-    background: var(--secondary-color);
+    background: var(--white);
     cursor: pointer;
-    border-radius: 20px;
+    border-radius: 30px;
     font-weight: bold;
-    transition: 0.3s;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
 }
 
 .tab-btn.active {
-    background: #74b9ff;
+    background: var(--accent-color);
     color: white;
 }
 
-.tab-content {
-    display: none;
-}
-
-.tab-content.active {
-    display: block;
-}
+.tab-content { display: none; }
+.tab-content.active { display: block; }
 
 .card {
     background: var(--white);
     padding: 25px;
-    border-radius: 15px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-}
-
-/* 할 일 목록 스타일 */
-.input-group {
-    display: flex;
-    gap: 10px;
+    border-radius: 20px;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.03);
     margin-bottom: 20px;
 }
 
-input {
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    flex: 1;
+/* 입력 영역 그리드 */
+.asset-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+    align-items: start;
 }
 
-button {
-    padding: 10px 15px;
-    border: none;
-    background: #a2c2e1;
-    color: white;
-    border-radius: 8px;
-    cursor: pointer;
-}
+.input-unit { display: flex; flex-direction: column; gap: 5px; }
 
-ul {
-    list-style: none;
-    padding: 0;
-}
-
-li {
+select, input {
     padding: 12px;
-    border-bottom: 1px solid #eee;
-    display: flex;
-    align-items: center;
+    border: 1px solid #ddecff;
+    border-radius: 10px;
+    font-size: 14px;
 }
 
-.todo-text.checked {
-    text-decoration: line-through;
-    color: #aaa;
+.hidden-input { display: none; margin-top: 5px; border-color: var(--primary-color); }
+
+.add-btn {
+    background: var(--accent-color);
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: bold;
 }
 
-/* 자산 관리 테이블 스타일 */
+/* 테이블 스타일 */
+.table-wrapper { overflow-x: auto; }
+
 table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 20px;
+    margin-top: 15px;
+    min-width: 900px;
 }
 
-th, td {
-    padding: 12px;
-    text-align: left;
-    border-bottom: 1px solid #eee;
+th {
+    background: #f8fbff;
+    padding: 15px;
+    border-bottom: 2px solid var(--primary-color);
 }
 
-.expense-input {
-    width: 80px;
-    margin-right: 5px;
+td {
+    padding: 15px;
+    border-bottom: 1px solid #f0f0f0;
+    text-align: center;
+}
+
+.expense-input { width: 70px; padding: 5px; }
+
+.todo-text.checked { text-decoration: line-through; color: #ccc; }
+
+ul { list-style: none; padding: 0; }
+li {
+    padding: 15px;
+    border-bottom: 1px solid #f9f9f9;
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
