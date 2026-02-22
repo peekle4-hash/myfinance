@@ -29,29 +29,35 @@ nav { display: flex; justify-content: center; gap: 10px; margin-bottom: 30px; }
 
 .card { background: var(--card-bg); padding: 25px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.02); margin-bottom: 20px; }
 
-/* 자산 카드 스타일 (표 대신 카드 형태 선택) */
-.asset-card { border-left: 8px solid var(--primary); margin-bottom: 20px; }
+/* 자산 카드 스타일 */
+.asset-card { border-left: 8px solid var(--primary); margin-bottom: 20px; position: relative; }
 .asset-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
 .asset-info h4 { margin: 0; font-size: 1.2rem; }
 .asset-info span { font-size: 0.85rem; color: #999; }
 
-/* 진행바 (저축 목표) */
 .progress-container { background: #edf2f7; border-radius: 10px; height: 12px; margin: 15px 0; overflow: hidden; }
 .progress-bar { background: var(--accent); height: 100%; transition: 0.5s; }
 
-/* 예정 지출(Earmarking) 섹션 */
 .planned-section { background: #fdfdfd; border: 1px dashed #e2e8f0; border-radius: 12px; padding: 15px; margin-top: 15px; }
 .planned-item { display: flex; justify-content: space-between; font-size: 0.9rem; padding: 5px 0; border-bottom: 1px solid #f7fafc; }
 
-.input-group { display: flex; gap: 10px; margin-top: 15px; }
-.input-group input { flex: 1; padding: 10px; border: 1px solid #e2e8f0; border-radius: 8px; }
+.asset-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; }
+.purpose-checklist { height: 130px; overflow-y: auto; border: 1px solid #e2e8f0; padding: 10px; border-radius: 8px; background: white; }
+.purpose-checklist label { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; margin-bottom: 6px; cursor: pointer; }
 
-/* 유틸리티 */
-.asset-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
-.purpose-checklist { height: 100px; overflow-y: auto; border: 1px solid #eee; padding: 10px; border-radius: 8px; font-size: 0.85rem; }
+input, select { padding: 10px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; width: 100%; box-sizing: border-box; }
 .amount-group { display: flex; gap: 5px; }
-.add-btn { background: var(--primary); color: white; border: none; border-radius: 10px; padding: 12px; cursor: pointer; font-weight: bold; }
-.hidden-input { display: none; margin-top: 5px; }
-ul { list-style: none; padding: 0; }
-li { padding: 10px; border-bottom: 1px solid #f7fafc; display: flex; align-items: center; gap: 10px; }
-.delete-btn { background: var(--danger); color: white; border: none; padding: 4px 8px; border-radius: 5px; cursor: pointer; font-size: 0.75rem; }
+.amount-group input { flex: 2; }
+.amount-group select { flex: 1; min-width: 80px; }
+
+.add-btn { background: var(--primary); color: white; border: none; border-radius: 10px; padding: 12px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+.add-btn:hover { background: var(--accent); }
+
+.hidden-input { display: none; margin-top: 5px; border-color: var(--accent); }
+
+table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+th, td { padding: 12px; text-align: center; border-bottom: 1px solid #edf2f7; }
+th { background: #f8fafc; color: #718096; }
+
+.delete-btn { background: var(--danger); color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; }
+li { padding: 12px; border-bottom: 1px solid #f7fafc; display: flex; align-items: center; gap: 10px; }
