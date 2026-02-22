@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>나의 재테크 관리</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>💎 재테크 플래너</h1>
+        <nav>
+            <button class="tab-btn active" onclick="openTab('todo')">오늘 할 일</button>
+            <button class="tab-btn" onclick="openTab('assets')">자산 관리</button>
+        </nav>
+    </header>
+
+    <!-- 탭 1: 오늘 할 일 -->
+    <section id="todo" class="tab-content active">
+        <div class="card">
+            <h3>📅 할 일 목록</h3>
+            <div class="input-group">
+                <input type="text" id="todoInput" placeholder="할 일을 입력하세요 (예: 적금 이체하기)">
+                <button onclick="addTodo()">추가</button>
+            </div>
+            <ul id="todoList"></ul>
+        </div>
+    </section>
+
+    <!-- 탭 2: 자산 관리 -->
+    <section id="assets" class="tab-content">
+        <div class="card">
+            <h3>💰 내 자산 현황</h3>
+            <div class="asset-form">
+                <input type="text" id="accName" placeholder="계좌명">
+                <input type="text" id="accPurpose" placeholder="용도 (예: 비상금, 교통비)">
+                <input type="number" id="accBalance" placeholder="현재 금액">
+                <button onclick="addAsset()">계좌 추가</button>
+            </div>
+            <table id="assetTable">
+                <thead>
+                    <tr>
+                        <th>계좌명</th>
+                        <th>용도</th>
+                        <th>현재 잔액</th>
+                        <th>비용 기록</th>
+                        <th>관리</th>
+                    </tr>
+                </thead>
+                <tbody id="assetBody"></tbody>
+            </table>
+        </div>
+    </section>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
