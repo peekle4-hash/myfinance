@@ -3,26 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>프리미엄 재테크 플래너</title>
+    <title>프리미엄 재테크 관리 시스템</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <div class="container">
     <header>
-        <h1>💎 스마트 자산 관리자</h1>
+        <h1>💎 스마트 자산 플래너 Pro</h1>
+        <!-- 상단 대시보드 확장 -->
+        <div class="summary-container">
+            <div class="summary-box">
+                <span class="label">총 자산</span>
+                <span id="totalAssets" class="value">0원</span>
+            </div>
+            <div class="summary-box">
+                <span class="label">예정 지출 합계</span>
+                <span id="totalPlanned" class="value" style="color: #ff8b94;">0원</span>
+            </div>
+            <div class="summary-box">
+                <span class="label">가용 자산 (순수 여유돈)</span>
+                <span id="availableCash" class="value" style="color: #48bb78;">0원</span>
+            </div>
+        </div>
+        
         <nav>
-            <button class="tab-btn active" onclick="openTab('todo')">오늘 할 일</button>
-            <button class="tab-btn" onclick="openTab('assets')">자산 관리</button>
+            <button class="tab-btn active" onclick="openTab('todo')">일정 관리</button>
+            <button class="tab-btn" onclick="openTab('assets')">자산/목표 관리</button>
+            <button class="tab-btn" onclick="openTab('records')">지출 기록</button>
         </nav>
     </header>
 
-    <!-- 탭 1: 오늘 할 일 -->
+    <!-- 탭 1: 날짜별 할 일 -->
     <section id="todo" class="tab-content active">
-        <div class="card">
-            <h3>📅 할 일 목록</h3>
+        <div class="card todo-card">
+            <h3>📅 재무 일정 및 할 일</h3>
+            <div class="date-selector">
+                <label>날짜 선택: </label>
+                <input type="date" id="todoDate" onchange="renderTodos()">
+            </div>
             <div class="input-group">
-                <input type="text" id="todoInput" placeholder="예: 적금 만기 확인하기">
+                <input type="text" id="todoInput" placeholder="할 일을 입력하세요">
                 <button onclick="addTodo()">추가</button>
             </div>
             <ul id="todoList"></ul>
@@ -31,32 +52,24 @@
 
     <!-- 탭 2: 자산 관리 -->
     <section id="assets" class="tab-content">
-        <div class="card asset-input-card">
-            <h3>💰 새 계좌 등록</h3>
+        <div class="card">
+            <h3>💰 새 계좌 및 저축 목표 등록</h3>
             <div class="asset-grid">
-                <!-- 은행 선택 -->
                 <div class="input-unit">
-                    <select id="bankSelect" onchange="toggleOtherInput('bankSelect', 'bankOther')">
-                        <option value="">은행 선택</option>
+                    <select id="bankSelect" onchange="toggleOther('bankSelect', 'bankOther')">
+                        <option value="">은행/증권사 선택</option>
                         <option value="우리은행">우리은행</option>
                         <option value="하나은행">하나은행</option>
                         <option value="신한은행">신한은행</option>
                         <option value="KB국민은행">KB국민은행</option>
                         <option value="NH농협은행">NH농협은행</option>
-                        <option value="IBK기업은행">IBK기업은행</option>
-                        <option value="카카오뱅크">카카오뱅크</option>
-                        <option value="토스뱅크">토스뱅크</option>
-                        <option value="케이뱅크">케이뱅크</option>
                         <option value="미래에셋증권">미래에셋증권</option>
-                        <option value="한국투자증권">한국투자증권</option>
                         <option value="기타">기타(직접입력)</option>
                     </select>
                     <input type="text" id="bankOther" class="hidden-input" placeholder="은행명 입력">
                 </div>
-
-                <!-- 계좌 종류 -->
                 <div class="input-unit">
-                    <select id="typeSelect" onchange="toggleOtherInput('typeSelect', 'typeOther')">
+                    <select id="typeSelect" onchange="toggleOther('typeSelect', 'typeOther')">
                         <option value="">계좌 종류</option>
                         <option value="예금">예금</option>
                         <option value="적금">적금</option>
@@ -64,56 +77,70 @@
                         <option value="CMA">CMA</option>
                         <option value="ISA">ISA</option>
                         <option value="보통예금(입출금)">보통예금(입출금)</option>
-                        <option value="기타">기타(직접입력)</option>
                     </select>
-                    <input type="text" id="typeOther" class="hidden-input" placeholder="계좌종류 입력">
                 </div>
-
-                <!-- 용도 선택 -->
-                <div class="input-unit">
-                    <select id="purposeSelect" onchange="toggleOtherInput('purposeSelect', 'purposeOther')">
-                        <option value="">용도 선택</option>
-                        <option value="비상금">비상금</option>
-                        <option value="교통비">교통비</option>
-                        <option value="월급수령">월급수령</option>
-                        <option value="통신비">통신비</option>
-                        <option value="보험료">보험료</option>
-                        <option value="생활비">생활비</option>
-                        <option value="투자대기자금">투자대기자금</option>
-                        <option value="투자금">투자금</option>
-                        <option value="예금">예금</option>
-                        <option value="주택청약저축">주택청약저축</option>
-                        <option value="기타">기타(직접입력)</option>
-                    </select>
-                    <input type="text" id="purposeOther" class="hidden-input" placeholder="용도 직접 입력">
+                <div class="input-unit multi-purpose">
+                    <label>용도 (중복 체크)</label>
+                    <div class="purpose-checklist" id="purposeChecklist">
+                        <label><input type="checkbox" value="비상금"> 비상금</label>
+                        <label><input type="checkbox" value="생활비"> 생활비</label>
+                        <label><input type="checkbox" value="투자금"> 투자금</label>
+                        <label><input type="checkbox" value="보험료"> 보험료</label>
+                        <label><input type="checkbox" value="공과금"> 공과금</label>
+                        <label><input type="checkbox" value="저축목표"> 저축목표</label>
+                    </div>
                 </div>
-
-                <input type="number" id="accBalance" placeholder="현재 금액 (원)">
-                <input type="number" id="accRate" placeholder="연 금리 (%)" step="0.1">
-                
+                <div class="amount-group-box">
+                    <div class="amount-group">
+                        <input type="number" id="accBalance" placeholder="현재 잔액">
+                        <select id="accUnit" onchange="convertUnit('accBalance', 'accUnit')">
+                            <option value="1">단위</option>
+                            <option value="10000">만원</option>
+                            <option value="1000000">백만</option>
+                        </select>
+                    </div>
+                    <div class="amount-group" style="margin-top:5px;">
+                        <input type="number" id="accTarget" placeholder="목표 금액 (선택)">
+                        <select id="targetUnit" onchange="convertUnit('accTarget', 'targetUnit')">
+                            <option value="1">단위</option>
+                            <option value="10000">만원</option>
+                            <option value="1000000">백만</option>
+                        </select>
+                    </div>
+                </div>
                 <button onclick="addAsset()" class="add-btn">계좌 추가</button>
             </div>
         </div>
 
-        <div class="card table-card">
-            <h3>📊 자산 현황 및 이자 계산</h3>
-            <div class="table-wrapper">
-                <table id="assetTable">
-                    <thead>
-                        <tr>
-                            <th>은행/종류</th>
-                            <th>용도</th>
-                            <th>현재 잔액</th>
-                            <th>연금리</th>
-                            <th>1년 예상 이자</th>
-                            <th>총 지출</th>
-                            <th>비용 기록</th>
-                            <th>관리</th>
-                        </tr>
-                    </thead>
-                    <tbody id="assetBody"></tbody>
-                </table>
+        <div id="assetDisplayArea">
+            <!-- 자산 카드가 자바스크립트에 의해 여기에 생성됩니다 -->
+        </div>
+    </section>
+
+    <!-- 탭 3: 지출 기록 -->
+    <section id="records" class="tab-content">
+        <div class="card">
+            <h3>💸 실제 지출 기록</h3>
+            <div class="asset-grid">
+                <select id="expAssetSelect"></select>
+                <input type="text" id="expMemo" placeholder="내용">
+                <div class="amount-group">
+                    <input type="number" id="expAmount" placeholder="지출 금액">
+                    <select id="expUnit" onchange="convertUnit('expAmount', 'expUnit')">
+                        <option value="1">원</option>
+                        <option value="10000">만원</option>
+                    </select>
+                </div>
+                <button onclick="addExpense()" class="add-btn" style="background: #ffb3ba;">기록</button>
             </div>
+        </div>
+        <div class="card">
+            <table id="expenseTable">
+                <thead>
+                    <tr><th>날짜</th><th>계좌</th><th>내용</th><th>금액</th><th>관리</th></tr>
+                </thead>
+                <tbody id="expenseBody"></tbody>
+            </table>
         </div>
     </section>
 </div>
