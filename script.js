@@ -1,130 +1,187 @@
-// 탭 전환
-function openTab(tabName) {
-    document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-    document.getElementById(tabName).classList.add('active');
-    event.currentTarget.classList.add('active');
+let todos = JSON.parse(localStorage.getItem('todos')) || [];
+let assets = JSON.parse(localStorage.getItem('assets')) || [];
+let expenses = JSON.parse(localStorage.getItem('expenses')) || [];
+
+document.getElementById('todoDate').valueAsDate = new Date();
+
+function saveAndRender() {
+    localStorage.setItem('todos', JSON.stringify(todos));
+    localStorage.setItem('assets', JSON.stringify(assets));
+    localStorage.setItem('expenses', JSON.stringify(expenses));
+    renderAll();
 }
 
-// "기타" 선택 시 입력창 표시
-function toggleOtherInput(selectId, otherId) {
-    const select = document.getElementById(selectId);
-    const otherInput = document.getElementById(otherId);
-    if (select.value === '기타') {
-        otherInput.style.display = 'block';
-    } else {
-        otherInput.style.display = 'none';
+function openTab(tabName) {
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(tabName).classList.add('active');
+    if(event) event.currentTarget.classList.add('active');
+}
+
+function convertUnit(inputId, unitId) {
+    const input = document.getElementById(inputId);
+    const multiplier = parseInt(document.getElementById(unitId).value);
+    if (input.value && multiplier > 1) {
+        input.value = parseFloat(input.value) * multiplier;
+        document.getElementById(unitId).value = "1";
     }
 }
 
-// --- 할 일 관리 ---
-let todos = JSON.parse(localStorage.getItem('todos')) || [];
+function toggleOther(selectId, otherId) {
+    const s = document.getElementById(selectId);
+    document.getElementById(otherId).style.display = (s.value === '기타') ? 'block' : 'none';
+}
+
+// 1. 할 일 관리
+function addTodo() {
+    const input = document.getElementById('todoInput');
+    const date = document.getElementById('todoDate').value;
+    if(input.value) {
+        todos.push({ text: input.value, completed: false, date: date });
+        input.value = '';
+        saveAndRender();
+    }
+}
 
 function renderTodos() {
     const list = document.getElementById('todoList');
+    const selectedDate = document.getElementById('todoDate').value;
     list.innerHTML = '';
-    todos.forEach((todo, index) => {
+    todos.filter(t => t.date === selectedDate).forEach((todo) => {
+        const realIdx = todos.indexOf(todo);
         const li = document.createElement('li');
         li.innerHTML = `
-            <span>${index + 1}.</span>
-            <input type="checkbox" ${todo.completed ? 'checked' : ''} onchange="toggleTodo(${index})">
-            <span class="todo-text ${todo.completed ? 'checked' : ''}">${todo.text}</span>
-            <button onclick="deleteTodo(${index})" style="margin-left:auto; background:var(--danger); border:none; border-radius:5px; color:white; cursor:pointer; padding:5px 10px;">삭제</button>
+            <input type="checkbox" ${todo.completed ? 'checked' : ''} onchange="todos[${realIdx}].completed = !todos[${realIdx}].completed; saveAndRender();">
+            <span style="text-decoration: ${todo.completed ? 'line-through' : 'none'}; flex:1;">${todo.text}</span>
+            <button class="delete-btn" onclick="todos.splice(${realIdx},1); saveAndRender();">삭제</button>
         `;
         list.appendChild(li);
     });
-    localStorage.setItem('todos', JSON.stringify(todos));
 }
 
-function addTodo() {
-    const input = document.getElementById('todoInput');
-    if (input.value) {
-        todos.push({ text: input.value, completed: false });
-        input.value = '';
-        renderTodos();
-    }
-}
-
-function toggleTodo(index) {
-    todos[index].completed = !todos[index].completed;
-    renderTodos();
-}
-
-function deleteTodo(index) {
-    todos.splice(index, 1);
-    renderTodos();
-}
-
-// --- 자산 관리 ---
-let assets = JSON.parse(localStorage.getItem('assets')) || [];
-
-function renderAssets() {
-    const body = document.getElementById('assetBody');
-    body.innerHTML = '';
-    
-    assets.forEach((asset, index) => {
-        const yearlyInterest = Math.floor(asset.balance * (asset.rate / 100)); // 이자 계산
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td><strong>${asset.bank}</strong><br><small>${asset.type}</small></td>
-            <td>${asset.purpose}</td>
-            <td style="color:#2d3436; font-weight:bold;">${Number(asset.balance).toLocaleString()}원</td>
-            <td>${asset.rate}%</td>
-            <td style="color:#0984e3;">+${yearlyInterest.toLocaleString()}원</td>
-            <td style="color:#d63031;">${Number(asset.totalSpent || 0).toLocaleString()}원</td>
-            <td>
-                <input type="number" class="expense-input" id="exp-${index}" placeholder="금액">
-                <button onclick="spendMoney(${index})" style="background:#a2d2ff; border:none; border-radius:5px; cursor:pointer;">기록</button>
-            </td>
-            <td><button onclick="deleteAsset(${index})" style="background:#fab1a0; border:none; border-radius:5px; cursor:pointer;">삭제</button></td>
-        `;
-        body.appendChild(tr);
-    });
-    localStorage.setItem('assets', JSON.stringify(assets));
-}
-
+// 2. 자산 관리 (예정 지출 및 목표 기능 포함)
 function addAsset() {
     const bank = document.getElementById('bankSelect').value === '기타' ? document.getElementById('bankOther').value : document.getElementById('bankSelect').value;
-    const type = document.getElementById('typeSelect').value === '기타' ? document.getElementById('typeOther').value : document.getElementById('typeSelect').value;
-    const purpose = document.getElementById('purposeSelect').value === '기타' ? document.getElementById('purposeOther').value : document.getElementById('purposeSelect').value;
-    const balance = document.getElementById('accBalance').value;
-    const rate = document.getElementById('accRate').value || 0;
-
-    if (bank && type && balance) {
-        assets.push({
-            bank, type, purpose, 
-            balance: parseInt(balance), 
-            rate: parseFloat(rate),
-            totalSpent: 0
-        });
-        renderAssets();
-        // 입력창 초기화
-        ['bankOther', 'typeOther', 'purposeOther'].forEach(id => document.getElementById(id).style.display = 'none');
-        document.querySelectorAll('.asset-grid input, .asset-grid select').forEach(el => el.value = '');
-    } else {
-        alert("은행, 계좌종류, 현재 금액은 필수 입력 사항입니다.");
-    }
-}
-
-function spendMoney(index) {
-    const amountInput = document.getElementById(`exp-${index}`);
-    const amount = parseInt(amountInput.value);
+    const type = document.getElementById('typeSelect').value;
+    const balance = parseInt(document.getElementById('accBalance').value) || 0;
+    const target = parseInt(document.getElementById('accTarget').value) || 0;
     
-    if (amount) {
-        assets[index].balance -= amount;
-        assets[index].totalSpent = (assets[index].totalSpent || 0) + amount;
-        renderAssets();
-        amountInput.value = '';
+    let purposes = [];
+    document.querySelectorAll('#purposeChecklist input:checked').forEach(cb => purposes.push(cb.value));
+
+    if(bank) {
+        assets.push({ 
+            id: Date.now(), bank, type, balance, target, 
+            purpose: purposes.join(', '), 
+            planned: [] // 예정 지출 항목들
+        });
+        saveAndRender();
+        document.querySelectorAll('.asset-grid input').forEach(i => i.value = '');
     }
 }
 
-function deleteAsset(index) {
-    if(confirm("정말 삭제하시겠습니까?")) {
-        assets.splice(index, 1);
-        renderAssets();
+function addPlanned(assetIdx) {
+    const memo = prompt("어디에 지출하실 예정인가요? (예: 통신비)");
+    const amount = parseInt(prompt("금액을 입력하세요 (숫자만)"));
+    if(memo && amount) {
+        assets[assetIdx].planned.push({ memo, amount });
+        saveAndRender();
     }
 }
 
-// 초기 로드
-renderTodos();
-renderAssets();
+function renderAssets() {
+    const area = document.getElementById('assetDisplayArea');
+    const select = document.getElementById('expAssetSelect');
+    area.innerHTML = '';
+    select.innerHTML = '';
+    
+    let totalBal = 0, totalPlan = 0;
+
+    assets.forEach((asset, i) => {
+        const plannedSum = asset.planned.reduce((sum, p) => sum + p.amount, 0);
+        const available = asset.balance - plannedSum;
+        const progress = asset.target > 0 ? Math.min((asset.balance / asset.target) * 100, 100) : 0;
+        
+        totalBal += asset.balance;
+        totalPlan += plannedSum;
+
+        const card = document.createElement('div');
+        card.className = 'card asset-card';
+        card.innerHTML = `
+            <div class="asset-header">
+                <div class="asset-info">
+                    <h4>${asset.bank} <small>(${asset.type})</small></h4>
+                    <span>용도: ${asset.purpose}</span>
+                </div>
+                <button class="delete-btn" onclick="assets.splice(${i},1); saveAndRender();">계좌 삭제</button>
+            </div>
+            <div style="display:flex; justify-content:space-between;">
+                <div>현재 잔액: <strong>${asset.balance.toLocaleString()}원</strong></div>
+                <div style="color:var(--success)">가용 자금: <strong>${available.toLocaleString()}원</strong></div>
+            </div>
+            
+            ${asset.target > 0 ? `
+                <div style="margin-top:10px; font-size:0.85rem;">목표: ${asset.target.toLocaleString()}원 (${progress.toFixed(1)}%)</div>
+                <div class="progress-container"><div class="progress-bar" style="width:${progress}%"></div></div>
+            ` : ''}
+
+            <div class="planned-section">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <strong style="font-size:0.9rem;">📍 예정 지출 내역</strong>
+                    <button onclick="addPlanned(${i})" style="font-size:0.7rem; cursor:pointer;">+ 추가</button>
+                </div>
+                <div id="planned-list-${i}">
+                    ${asset.planned.map((p, pIdx) => `
+                        <div class="planned-item">
+                            <span>- ${p.memo}</span>
+                            <span>${p.amount.toLocaleString()}원 <button onclick="assets[${i}].planned.splice(${pIdx},1); saveAndRender();" style="border:none; background:none; color:red; cursor:pointer;">x</button></span>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+        area.appendChild(card);
+        select.innerHTML += `<option value="${asset.id}">${asset.bank} (${asset.balance.toLocaleString()}원)</option>`;
+    });
+
+    document.getElementById('totalAssets').innerText = totalBal.toLocaleString() + '원';
+    document.getElementById('totalPlanned').innerText = totalPlan.toLocaleString() + '원';
+    document.getElementById('availableCash').innerText = (totalBal - totalPlan).toLocaleString() + '원';
+}
+
+// 3. 실제 지출 관리
+function addExpense() {
+    const assetId = parseInt(document.getElementById('expAssetSelect').value);
+    const memo = document.getElementById('expMemo').value;
+    const amount = parseInt(document.getElementById('expAmount').value);
+    const assetIdx = assets.findIndex(a => a.id === assetId);
+
+    if(assetIdx > -1 && amount) {
+        assets[assetIdx].balance -= amount;
+        expenses.push({ date: new Date().toLocaleDateString(), bank: assets[assetIdx].bank, memo, amount, assetId });
+        saveAndRender();
+        document.getElementById('expMemo').value = '';
+        document.getElementById('expAmount').value = '';
+    }
+}
+
+function renderExpenses() {
+    const body = document.getElementById('expenseBody');
+    body.innerHTML = '';
+    expenses.forEach((exp, i) => {
+        body.innerHTML += `
+            <tr>
+                <td>${exp.date}</td><td>${exp.bank}</td><td>${exp.memo}</td>
+                <td style="color:red">-${exp.amount.toLocaleString()}원</td>
+                <td><button class="delete-btn" onclick="
+                    const aIdx = assets.findIndex(a => a.id === expenses[${i}].assetId);
+                    if(aIdx > -1) assets[aIdx].balance += expenses[${i}].amount;
+                    expenses.splice(${i},1); saveAndRender();
+                ">취소</button></td>
+            </tr>
+        `;
+    });
+}
+
+function renderAll() { renderTodos(); renderAssets(); renderExpenses(); }
+renderAll();
